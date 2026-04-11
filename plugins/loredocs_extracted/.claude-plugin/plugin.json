@@ -1,0 +1,12 @@
+{
+  "name": "loredocs",
+  "version": "0.1.0",
+  "description": "Searchable, organized, version-tracked knowledge base for your AI projects. Store documents, tag them, search across them, and inject context into any Claude conversation.",
+  "author": {
+    "name": "Labyrinth Analytics Consulting"
+  },
+  "homepage": "https://github.com/labyrinth-analytics/loredocs",
+  "repository": "https://github.com/labyrinth-analytics/loredocs",
+  "keywords": ["knowledge-management", "documents", "search", "ai-projects", "vault"],
+  "license": "BSL-1.1"
+}

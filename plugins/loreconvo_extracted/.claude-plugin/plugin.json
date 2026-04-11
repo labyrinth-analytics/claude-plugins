@@ -1,0 +1,12 @@
+{
+  "name": "loreconvo",
+  "version": "0.3.0",
+  "description": "Cross-surface persistent memory for Claude sessions. Vault conversations from Code, Cowork, and Chat -- recall decisions, artifacts, and context in any future session.",
+  "author": {
+    "name": "Labyrinth Analytics Consulting"
+  },
+  "homepage": "https://github.com/labyrinth-analytics/loreconvo",
+  "repository": "https://github.com/labyrinth-analytics/loreconvo",
+  "keywords": ["memory", "sessions", "conversations", "recall", "context", "cross-surface"],
+  "license": "BSL-1.1"
+}
