@@ -195,6 +195,21 @@ Both plugins are **local-first**. All data lives on your machine. Nothing is sen
 
 ---
 
+## Troubleshooting
+
+### Plugin marketplace add fails with SSH or authentication errors
+
+Claude Code may try to clone the marketplace over SSH instead of HTTPS. If you see a
+`git@github.com: Permission denied` or similar SSH error, run:
+
+```bash
+git config --global url."https://github.com/".insteadOf "git@github.com:"
+```
+
+Then retry the `/plugin marketplace add` command.
+
+---
+
 ## Support
 
 - LoreConvo issues: [github.com/labyrinth-analytics/loreconvo/issues](https://github.com/labyrinth-analytics/loreconvo/issues)

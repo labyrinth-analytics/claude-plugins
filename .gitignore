@@ -1,0 +1,4 @@
+# Test and local-only plugin files -- never commit these to the marketplace repo.
+# They use local venv paths and will cause MCP schema validation failures if published.
+plugins/*-test.plugin
+plugins/*-local.plugin
