@@ -1,6 +1,6 @@
 {
   "name": "loreconvo",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Cross-surface persistent memory for Claude sessions. Vault conversations from Code, Cowork, and Chat -- recall decisions, artifacts, and context in any future session.",
   "author": {
     "name": "Labyrinth Analytics Consulting"
