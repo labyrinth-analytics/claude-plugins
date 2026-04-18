@@ -8,7 +8,7 @@ Claude plugins from [Labyrinth Analytics Consulting](https://labyrinthanalyticsc
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **LoreConvo** | v0.3.0 | Cross-surface persistent memory for Claude sessions |
+| **LoreConvo** | v0.3.2 | Cross-surface persistent memory for Claude sessions |
 | **LoreDocs** | v0.1.0 | Searchable knowledge base for AI projects |
 
 ---
