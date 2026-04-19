@@ -130,6 +130,7 @@ Each session record captures:
 | `list_personas` | List all personas in the vault |
 | `get_stats` | Summary statistics about your vault |
 | `vault_suggest` | Proactive suggestions -- what to revisit based on open questions |
+| `vault_set_tier` | Activate a Pro license key to unlock unlimited sessions |
 
 ---
 
@@ -153,7 +154,7 @@ Each session record captures:
 | Projects | 3 | Unlimited |
 | Export formats | Markdown | Markdown + JSON |
 
-Pro upgrade: [labyrinthanalyticsconsulting.com](https://labyrinthanalyticsconsulting.com)
+**[Upgrade to Pro ($8/mo)](https://buy.stripe.com/9B65kv1VOgk3ekr7VD7N600)**
 
 ---
 
