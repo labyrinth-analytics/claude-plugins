@@ -136,7 +136,7 @@ If tools appear in your session, the local test install is working.
 Cross-surface persistent memory for Claude sessions. Save conversations from Code, Cowork, and Chat -- recall decisions, artifacts, and context in any future session. Never re-explain yourself again.
 
 **Key features:**
-- 13 MCP tools for saving, searching, and recalling sessions
+- 14 MCP tools for saving, searching, and recalling sessions
 - Automatic SessionEnd/SessionStart hooks (Claude Code)
 - Full-text search across all session summaries
 - Tag-based filtering and persona support
