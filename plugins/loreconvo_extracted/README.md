@@ -94,7 +94,7 @@ graph LR
     B -->|export-to-chat.sh| E
 ```
 
-**Claude Code (fully automatic):** A SessionEnd hook saves your session when you close it. A SessionStart hook loads relevant context when you open a new one. Zero clicks required.
+**Claude Code (fully automatic):** A SessionEnd hook saves your session when you close it. A SessionStart hook loads relevant context when you open a new one. A PreCompact hook automatically saves your session before context compression -- no context lost, even in long sessions. Zero clicks required.
 
 **Cowork:** Use MCP tools directly -- ask Claude to recall what you discussed last time, search for a past decision, or save the current session to the vault.
 
@@ -123,13 +123,14 @@ Each session record captures:
 | `get_session` | Get full detail for a specific session |
 | `search_sessions` | Full-text search across all session summaries |
 | `get_context_for` | Return relevant fragments for a given topic |
-| `get_sessions_by_tag` | Filter sessions by tag |
-| `get_sessions_by_persona` | Filter by persona (for AI agent use cases) |
-| `update_session` | Update an existing session record |
-| `delete_session` | Remove a session |
-| `list_personas` | List all personas in the vault |
-| `get_stats` | Summary statistics about your vault |
+| `tag_session` | Tag a session with a persona for filtered recall |
+| `link_sessions` | Connect two related sessions with a relationship type |
+| `get_project` | Get project details and recent session stats |
+| `list_projects` | List all defined projects with session counts |
+| `create_project` | Create or update a project definition |
+| `get_skill_history` | See all sessions that used a specific skill |
 | `vault_suggest` | Proactive suggestions -- what to revisit based on open questions |
+| `get_tier` | Check your current tier and license key status |
 | `vault_set_tier` | Activate a Pro license key to unlock unlimited sessions |
 
 ---
