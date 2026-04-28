@@ -132,6 +132,8 @@ Each session record captures:
 | `vault_suggest` | Proactive suggestions -- what to revisit based on open questions |
 | `get_tier` | Check your current tier and license key status |
 | `vault_set_tier` | Activate a Pro license key to unlock unlimited sessions |
+| `export_sessions` | Export sessions to JSON or JSONL for backup or migration |
+| `import_sessions` | Import sessions from a LoreConvo export file |
 
 ---
 
@@ -139,7 +141,7 @@ Each session record captures:
 
 | Platform | Support | Notes |
 |---|---|---|
-| **Claude Code** | Full | SessionEnd/SessionStart hooks run automatically |
+| **Claude Code** | Full | SessionEnd/SessionStart/PreCompact hooks run automatically |
 | **Cowork** | Full | MCP tools available; vault_save and vault_recall work end-to-end |
 | **Chat (web)** | Partial | No plugin support; use `export-to-chat.sh` to bridge context |
 
