@@ -2,13 +2,15 @@
 
 Claude plugins from [Labyrinth Analytics Consulting](https://labyrinthanalyticsconsulting.com). Persistent memory and knowledge management for your Claude sessions.
 
+> **Both plugins are published on the Anthropic Marketplace.** Search for "LoreConvo" or "LoreDocs" to install directly from Claude. This repo is the self-hosted alternative for local or pre-release installs.
+
 ---
 
 ## Available Plugins
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **LoreConvo** | v0.3.2 | Cross-surface persistent memory for Claude sessions |
+| **LoreConvo** | v0.3.3 | Cross-surface persistent memory for Claude sessions |
 | **LoreDocs** | v0.1.0 | Searchable knowledge base for AI projects |
 
 ---
@@ -136,7 +138,7 @@ If tools appear in your session, the local test install is working.
 Cross-surface persistent memory for Claude sessions. Save conversations from Code, Cowork, and Chat -- recall decisions, artifacts, and context in any future session. Never re-explain yourself again.
 
 **Key features:**
-- 14 MCP tools for saving, searching, and recalling sessions
+- 16 MCP tools for saving, searching, and recalling sessions
 - Automatic SessionEnd/SessionStart hooks (Claude Code)
 - Full-text search across all session summaries
 - Tag-based filtering and persona support
@@ -151,7 +153,7 @@ Cross-surface persistent memory for Claude sessions. Save conversations from Cod
 Searchable, organized knowledge base for your AI projects. Store documents, tag them, search across them, and inject context into any Claude conversation.
 
 **Key features:**
-- 35 MCP tools for document management, search, and context injection
+- 36 MCP tools for document management, search, and context injection
 - Supports .md, .txt, .docx, .pdf, .xlsx, .pptx, and code files
 - Version history and document linking
 - Vault-based organization (one vault per project)
