@@ -80,6 +80,26 @@ LoreConvo fixes this.
 
 ---
 
+## Why LoreConvo?
+
+**Your memory stays on your machine.** Unlike cloud-based memory tools, LoreConvo stores
+everything in a SQLite database on your own machine. No data leaves your computer. No
+subscription to a memory cloud. No vendor with access to your session history.
+
+**Works wherever Claude works.** LoreConvo works across Claude Code, Claude.ai, and Cowork --
+not just in one IDE. When you switch surfaces mid-project, your context travels with you.
+
+**Structured memory, not raw transcripts.** LoreConvo captures two types of memory for
+each session:
+
+- **Episodic memory:** what happened -- summaries, artifacts created, open questions left behind
+- **Semantic memory:** what was decided -- stable conclusions that persist across sessions
+
+Together these give Claude a structured, searchable record of your project's history,
+not just a pile of chat transcripts.
+
+---
+
 ## How It Works Across Surfaces
 
 ```mermaid
@@ -169,7 +189,11 @@ Each session record captures:
 
 ## Data and Privacy
 
-LoreConvo is **local-first**. All data lives in `~/.loreconvo/sessions.db` on your machine. Nothing is sent to any external server. You own your data.
+LoreConvo is **local-first**. All data lives in `~/.loreconvo/sessions.db` on your machine.
+Nothing is sent to any external server -- not to Anthropic, not to Labyrinth Analytics,
+not anywhere. No memory cloud. No data policy to trust but your own file system.
+
+You own your data. Back it up with `cp`, move it with `mv`, delete it any time.
 
 ---
 

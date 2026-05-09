@@ -185,9 +185,18 @@ LoreDocs handles text extraction from all common document types:
 
 ---
 
-## Companion Product
+## Portable Project Workspace
 
-**[LoreConvo](https://github.com/labyrinth-analytics/loreconvo)** -- Cross-surface persistent memory for Claude sessions. Where LoreDocs stores *documents*, LoreConvo remembers *conversations* -- decisions made, artifacts created, questions left open. They complement each other well.
+LoreDocs and **[LoreConvo](https://github.com/labyrinth-analytics/loreconvo)** together form
+a portable project workspace for all of Claude -- session memory AND structured knowledge,
+entirely on your machine.
+
+- **LoreDocs** stores the reference docs, specs, and guides Claude needs (durable knowledge)
+- **LoreConvo** remembers what you discussed, decided, and left open (episodic + semantic memory)
+
+Where cloud AI workspaces tie you to one ecosystem, LoreDocs + LoreConvo works across
+every Claude surface you already use -- Code, Cowork, and Chat. Both store data locally.
+Neither sends anything to an external server.
 
 ---
 
