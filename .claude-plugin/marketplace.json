@@ -42,6 +42,22 @@
       "keywords": ["knowledge-management", "documents", "search", "ai-projects", "vault"]
     },
     {
+      "name": "lorecache",
+      "source": {
+        "source": "github",
+        "repo": "labyrinth-analytics/lorecache",
+        "ref": "v1.0.0"
+      },
+      "description": "Claude prompt cache ROI analyzer. See which agents benefit most from caching, track daily hit rate trends, and get actionable optimization recommendations -- all from your local agent_metrics.db.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Labyrinth Analytics Consulting"
+      },
+      "homepage": "https://github.com/labyrinth-analytics/lorecache",
+      "license": "BSL-1.1",
+      "keywords": ["prompt-caching", "analytics", "claude", "cost", "roi", "ai-tools"]
+    },
+    {
       "name": "loremigrate",
       "source": {
         "source": "github",
