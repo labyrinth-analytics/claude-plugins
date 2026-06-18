@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an improvement to a plugin or the marketplace
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Tell us what problem you're trying to solve -- that's often
+        more useful than a specific solution.
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Which plugin (or the marketplace itself)?
+      options:
+        - LoreConvo
+        - LoreDocs
+        - The marketplace itself
+        - Something new
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: I want to ... but currently I have to ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: false
