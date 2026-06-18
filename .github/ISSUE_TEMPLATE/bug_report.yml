@@ -1,0 +1,62 @@
+name: Bug report
+description: A plugin from this marketplace won't install or isn't working
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. This repo is the Labyrinth Analytics plugin marketplace for
+        Claude Code. For bugs in a plugin's own behavior, the product repo
+        (e.g. labyrinth-analytics/loreconvo) may be a better fit -- but if you're not sure, here is fine.
+
+        **Privacy note:** Do not paste license keys, API keys, or private data into this public issue.
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Which plugin?
+      options:
+        - LoreConvo
+        - LoreDocs
+        - Not sure / the marketplace itself
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+      placeholder: When I ran `/plugin install ...`, I expected X but got Y.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add marketplace ...
+        2. Install plugin ...
+        3. See error
+    validations:
+      required: true
+  - type: input
+    id: cc-version
+    attributes:
+      label: Claude Code version
+      description: Output of `claude --version`.
+      placeholder: "2.1.x"
+    validations:
+      required: false
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15.5 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error output
+      render: shell
+    validations:
+      required: false
