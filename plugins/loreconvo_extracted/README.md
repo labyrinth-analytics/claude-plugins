@@ -1,8 +1,8 @@
-# LoreConvo v0.4.0
+# LoreConvo
 
-Vault your Claude conversations. Never re-explain yourself again.
+AI memory that follows you across Claude Code, Cursor, Codex, and Hermes. Local, private, searchable.
 
-Persistent cross-surface memory for Claude. Capture session context across Code, Cowork, and Chat. Organize by project, skill, and persona.
+LoreConvo works across Claude Code, Cursor, Codex, and Hermes -- your context follows you, not your tool. Stop re-explaining yourself every time you switch clients or pick up a project after a few days away.
 
 > **Available on the Anthropic Marketplace.** Install directly from Claude, or via PyPI: `uvx loreconvo`
 
@@ -17,10 +17,15 @@ access to your session history.
 Your sessions live in `~/.loreconvo/sessions.db` -- a file you own, can back up, and can
 delete any time.
 
-### Works wherever Claude works
+### Works wherever you work
 
-LoreConvo works across Claude Code, Claude.ai, and Cowork -- not just in one IDE.
-When you switch surfaces mid-project, your context travels with you automatically.
+LoreConvo works across Claude Code, Cursor, Codex, and Hermes -- the same memory
+layer, no matter which client you reach for. When you switch mid-project, your
+context travels with you automatically.
+
+Most tools wall off memory by machine or workspace. LoreConvo stores everything
+locally in a SQLite database you own, and surfaces it wherever you are. You decide
+what gets saved; nothing is written without your action.
 
 ### Structured memory, not raw transcripts
 
@@ -211,7 +216,7 @@ At session end:
 
 ## Features
 
-- **Cross-surface memory**: Bridge context between Claude Code, Cowork, and Chat
+- **Cross-client memory**: Your context follows you across Claude Code, Cursor, Codex, and Hermes -- not locked to one IDE or machine
 - **Structured sessions**: Captures decisions, artifacts, open questions -- not just raw text
 - **Project organization**: Group sessions by project with expected skill sets
 - **Skill tracking**: Record which skills were used for smart filtering
