@@ -14,10 +14,10 @@
       "source": {
         "source": "github",
         "repo": "labyrinth-analytics/loreconvo",
-        "ref": "v0.8.4"
+        "ref": "v0.8.5"
       },
       "description": "Cross-surface persistent memory for Claude sessions. Vault conversations from Code, Cowork, and Chat -- recall decisions, artifacts, and context in any future session.",
-      "version": "0.8.4",
+      "version": "0.8.5",
       "author": {
         "name": "Labyrinth Analytics Consulting"
       },
