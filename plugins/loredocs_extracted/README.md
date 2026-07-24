@@ -1,8 +1,8 @@
-# LoreDocs v0.1.0
+# LoreDocs v0.1.15
 
 Your AI project's knowledge base. Organized, searchable, version-tracked.
 
-LoreDocs gives Claude persistent access to your project documentation -- specs, guides, architecture decisions, reference docs -- so it never loses context between sessions. Works with Claude Code and Cowork.
+LoreDocs gives Claude persistent access to your project documentation -- specs, guides, architecture decisions, reference docs -- so it never loses context between sessions. Works with Claude Code, Cursor, OpenAI Codex, and Hermes Agent.
 
 > **Available on the Anthropic Marketplace.** Install directly from Claude, or via PyPI: `uvx loredocs`
 
@@ -19,7 +19,7 @@ cd /path/to/loredocs
 uv sync
 ```
 
-For detailed installation instructions (including Cowork plugin setup), see [INSTALL.md](INSTALL.md).
+For detailed installation instructions, see [INSTALL.md](INSTALL.md).
 
 ## Using LoreDocs
 
@@ -35,7 +35,7 @@ Or inside an existing session:
 /plugin add /path/to/loredocs
 ```
 
-Once loaded, Claude has access to all 37 LoreDocs MCP tools automatically. Ask Claude to "create a vault for this project" or "find the architecture doc" and it uses the tools on its own.
+Once loaded, Claude has access to all 46 LoreDocs MCP tools automatically. Ask Claude to "create a vault for this project" or "find the architecture doc" and it uses the tools on its own.
 
 ### Cowork (Desktop App)
 
@@ -98,6 +98,89 @@ At session end:
 
 **For Cowork users:** Cowork does not run hooks automatically. Add instructions to call `vault_list` and `vault_inject_summary` at session start in your project CLAUDE.md.
 
+## Canonical Project Knowledge
+
+In multi-agent environments, different tools and agents often create improvised mirrors
+of shared skill or configuration content -- playbooks, style guides, shared reference
+docs. Those mirrors drift. One agent updates the source; the other keeps reading the
+stale copy. Two agents in the same project end up operating from divergent knowledge
+with no visible signal that anything is wrong.
+
+LoreDocs prevents this by making the vault the single canonical source that every agent
+reads. Instead of each agent loading a local file copy, every agent calls
+`vault_inject_by_tag` at session start and gets the same vault-managed version.
+
+### Recommended pattern
+
+Store shared content (playbooks, team guidelines, shared specs) as vault documents
+rather than as local files that agents copy or mirror.
+
+Agents load the content at session start:
+
+```
+vault_inject_by_tag: team-playbook
+```
+
+All agents -- regardless of surface (Claude Code, Cowork, CLI, or any future AI tool)
+-- call the same vault and receive the same current version. Updating the content
+requires editing the vault document once; all agents pick up the change on their next
+session start.
+
+Local files (`.claude/skills/`, `.agents/`, or any surface-specific config) become
+pointers or bootstrap stubs only -- not the authoritative content. The vault is the
+source of truth.
+
+### Example: sharing a playbook across an agent team
+
+```python
+# Session start for any agent on the team:
+# 1. Inject the shared playbook by tag
+vault_inject_by_tag("team-playbook")
+
+# 2. Inject any project-specific reference docs
+vault_inject_by_tag("project-architecture")
+
+# Working context is now current -- no local file copies needed.
+```
+
+To store the shared content in the vault (one time, or on each update):
+
+```python
+# Store (or update) the shared playbook:
+vault_update_doc(vault="team-knowledge", doc_id="playbook-id", content=open("PLAYBOOK.md").read())
+
+# Or add it fresh (path= reads directly from disk -- no need to load into context):
+vault_add_doc(vault="team-knowledge", name="Team Playbook", path="/absolute/path/to/PLAYBOOK.md", tags=["team-playbook"])
+```
+
+Any agent that calls `vault_inject_by_tag("team-playbook")` reads the same document.
+No copies, no mirrors, no drift.
+
+## Plans: Free vs Pro
+
+LoreDocs is local-first and free to use. Pro ($9/mo) removes the storage limits and
+unlocks semantic (meaning-based) retrieval. Everything runs on your machine on either
+plan -- Pro does not add any cloud component.
+
+| | Free | Pro ($9/mo) |
+|---|---|---|
+| Vaults | 3 | Unlimited |
+| Documents per vault | 50 | Unlimited |
+| Storage | 500 MB | Unlimited |
+| Version history per document | 5 versions | Unlimited |
+| Full-text search (FTS5) | Yes | Yes |
+| Core MCP tools (create, search, version, tag, inject, import/export) | Yes | Yes |
+| Local-first, no cloud, no telemetry | Yes | Yes |
+| Semantic search (`vault_search semantic=true`, `vault_rebuild_index`) | -- | Yes |
+| Embedding-based document relationships (`vault_find_related`) | Keyword co-occurrence only | Keyword + embedding auto-links |
+| Cross-product session linking (`vault_link_session` + 2 more) | -- | Yes (also requires LoreConvo Pro) |
+
+Free tier limits are enforced before writes; Pro removes them. Check your current tier
+and usage anytime with `vault_tier_status`. Activate a Pro license with `vault_set_tier`.
+
+> The Pro semantic features use a local embedding model (BGE-small-en-v1.5) and the
+> LanceDB index -- still no data leaves your machine.
+
 ## Features
 
 - **Vault organization**: Group docs by project with linked project metadata
@@ -108,14 +191,16 @@ At session end:
 - **Context injection**: Load specific docs, tags, or vault summaries into Claude's context
 - **Bulk operations**: Import directories, bulk-tag, export manifests
 - **Document linking**: Connect related docs across vaults
-- **Tier management**: Free/Pro/Team tiers with configurable limits
+- **Embedding-based document relationships (Pro)**: `vault_find_related` returns both keyword co-occurrence and embedding-based auto-links for Pro users. Uses BGE-small-en-v1.5, cosine >= 0.75, same-vault scoped. Embedding links are archived if you downgrade from Pro to Free.
+- **Cross-product session linking (Pro)**: Automatically links vault documents to the most relevant LoreConvo sessions, and vice versa. Three tools: `vault_link_session`, `vault_get_session_links`, `vault_get_linked_sessions`. Requires both LoreDocs Pro and LoreConvo Pro.
+- **Tier management**: Free/Pro tiers with configurable limits
 - **Local-first**: SQLite database, no cloud dependency, zero API costs
 
 ## MCP Tools
 
-LoreDocs provides 37 MCP tools organized by function:
+LoreDocs provides 46 MCP tools by default (47 with LOREDOCS_ENABLE_CAP_TOOLS=1) organized by function:
 
-### Vault Management (6 tools)
+### Vault Management (8 tools)
 | Tool | What it does |
 |------|-------------|
 | `vault_create` | Create a new vault with name and description |
@@ -124,11 +209,13 @@ LoreDocs provides 37 MCP tools organized by function:
 | `vault_archive` | Archive a vault (preserves data, hides from listing) |
 | `vault_delete` | Permanently delete a vault and all its documents |
 | `vault_link_project` | Link a vault to a project directory |
+| `vault_open_workspace` | Open or create the vault scoped to a directory path |
+| `loredocs_onboard` | Set up workspace with starter vaults on first install |
 
-### Document Operations (9 tools)
+### Document Operations (10 tools)
 | Tool | What it does |
 |------|-------------|
-| `vault_add_doc` | Add a new document to a vault |
+| `vault_add_doc` | Add a new document to a vault (inline content or from file path) |
 | `vault_update_doc` | Update document content (creates version history) |
 | `vault_remove_doc` | Remove a document from a vault |
 | `vault_get_doc` | Retrieve a document with full content |
@@ -138,13 +225,14 @@ LoreDocs provides 37 MCP tools organized by function:
 | `vault_doc_history` | View version history of a document |
 | `vault_doc_restore` | Restore a document to a previous version |
 
-### Search and Discovery (4 tools)
+### Search and Discovery (5 tools)
 | Tool | What it does |
 |------|-------------|
 | `vault_search` | Full-text search across all vaults |
 | `vault_search_by_tag` | Find documents by tag across all vaults |
-| `vault_find_related` | Discover documents related to a given doc |
+| `vault_find_related` | Discover documents related to a given doc (Pro only) |
 | `vault_suggest` | Proactive suggestions for relevant docs to load |
+| `vault_rebuild_index` | Rebuild the LanceDB semantic search index (Pro only; run once after installing Pro deps) |
 
 ### Organization (5 tools)
 | Tool | What it does |
@@ -155,12 +243,18 @@ LoreDocs provides 37 MCP tools organized by function:
 | `vault_set_priority` | Set document priority level |
 | `vault_add_note` | Add a note or annotation to a document |
 
-### Context Injection (3 tools)
+### Context Injection (9 tools)
 | Tool | What it does |
 |------|-------------|
-| `vault_inject` | Load specific documents into Claude's context |
-| `vault_inject_by_tag` | Load all documents matching a tag |
+| `vault_inject` | Load ranked vault documents into context, packed within a token budget |
+| `vault_inject_by_tag` | Load all documents matching a tag, packed within a token budget |
 | `vault_inject_summary` | Load a vault summary with doc titles and descriptions |
+| `vault_prime` | Pre-load all vault documents by priority order (equivalent to `vault_inject` with no query) |
+| `vault_get_injection_cap` | Get the configured token cap for a vault's injection tools |
+| `vault_set_injection_cap` | Set a vault's injection token cap (requires `LOREDOCS_ENABLE_CAP_TOOLS=1`) |
+| `vault_get_session_token` | Generate a per-session cache key for injection tools |
+| `vault_estimate_tokens` | Estimate the token count an injection call would use before running it |
+| `vault_get_server_capabilities` | Report which injection/token-budget features this server build supports |
 
 ### Import/Export (3 tools)
 | Tool | What it does |
@@ -179,8 +273,15 @@ LoreDocs provides 37 MCP tools organized by function:
 | Tool | What it does |
 |------|-------------|
 | `vault_tier_status` | Check current tier limits and usage |
-| `vault_set_tier` | Set the active tier (free, pro, team) |
+| `vault_set_tier` | Set the active tier (free or pro) |
 | `get_license_tier` | Check current tier and license key status |
+
+### Cross-product Session Links (3 tools, Pro)
+| Tool | What it does |
+|------|-------------|
+| `vault_link_session` | Create a manual link from a LoreConvo session to a LoreDocs document |
+| `vault_get_session_links` | Return LoreConvo sessions linked to a LoreDocs document |
+| `vault_get_linked_sessions` | Return LoreDocs documents linked to a given LoreConvo session |
 
 ## Portable Project Workspace
 
@@ -192,7 +293,7 @@ entirely on your machine.
 - **LoreDocs** stores the reference docs, specs, and guides Claude needs (durable knowledge)
 
 Where cloud AI workspaces tie you to one ecosystem, LoreConvo + LoreDocs works across
-every Claude surface you already use -- Code, Cowork, and Chat. Both store data locally in
+Claude Code, Cursor, OpenAI Codex, Hermes Agent, and Cowork. Both store data locally in
 SQLite. Neither sends anything to an external server.
 
 ## Requirements
@@ -254,6 +355,33 @@ echo "# Quick Note" | python scripts/query_loredocs.py --add-doc \
 ```
 
 The script auto-discovers the database at `~/.loredocs/loredocs.db` (or pass `--db-path` explicitly). It writes the same schema as the MCP tools, including FTS indexing and on-disk file storage.
+
+## What's New
+
+<!-- WHATS_NEW:START -->
+
+## v0.1.15
+
+### Improved: free-tier saves no longer fail at the version-history cap
+
+On the free tier, saving a document that had already reached its version-history
+limit used to fail. Now the save always succeeds: LoreDocs removes the oldest
+stored version to make room, keeps your latest change, and returns a note that a
+version was rotated out. Your current document is never lost. Upgrade to Pro for
+unlimited version history.
+
+### Docs: accurate MCP tool listing
+
+The documentation now lists the correct number of MCP tools LoreDocs provides
+(46, previously shown as 42), including several that were already available but
+missing from the reference, such as previewing the token cost of a vault
+injection before spending context on it and reporting the server's injection
+capabilities. This part of the release updates documentation only; nothing
+changes in how LoreDocs runs.
+
+<!-- WHATS_NEW:END -->
+
+See the full [changelog](docs/CHANGELOG.md) for the complete release history.
 
 ## License
 

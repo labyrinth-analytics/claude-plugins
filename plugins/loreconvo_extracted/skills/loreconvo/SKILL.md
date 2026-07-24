@@ -7,7 +7,7 @@ description: >
   recall decisions, artifacts, or context from previous Code, Cowork, or Chat sessions.
   Also triggers on "tag as persona", "link sessions", "project context", or "skill history".
 metadata:
-  version: "0.4.0"
+  version: "0.7.1"
   author: "Labyrinth Analytics Consulting"
 ---
 
@@ -64,6 +64,11 @@ At the start of a session, or when the user asks about prior work:
 - `get_recent_sessions()` - See what was done recently
 - `get_project("project-name")` - Load project context with skill usage stats
 - `get_skill_history("skill-name")` - Find sessions that used a specific skill
+- `get_related_sessions(session_id)` - Find sessions with similar content. Returns a
+  v2 envelope `{"version": 2, "sessions": [...]}` where each entry has `link_type`
+  (cooccurrence or embedding) and `shared_term_count`. Free tier: cooccurrence links
+  only. Pro tier: adds embedding-based auto-links (BGE-small-en-v1.5, cosine >= 0.75,
+  same-project scoped). Set `LORECONVO_EMBEDDING_LINKS=0` to disable embedding links.
 
 ## Persona Tagging
 

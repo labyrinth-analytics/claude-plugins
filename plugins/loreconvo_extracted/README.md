@@ -1,21 +1,12 @@
-# LoreConvo
+# LoreConvo v0.8.6
 
-AI memory that follows you across Claude Code, Cursor, Codex, and Hermes. Local, private, searchable.
+Your memory follows your identity, not your tool — with your consent.
 
-LoreConvo works across Claude Code, Cursor, Codex, and Hermes -- your context follows you, not your tool. Stop re-explaining yourself every time you switch clients or pick up a project after a few days away.
+LoreConvo is the only AI memory that carries your context across Claude Code, Codex, Cursor, and Hermes Agent. One install, one memory, everywhere you code.
 
 > **Available on the Anthropic Marketplace.** Install directly from Claude, or via PyPI: `uvx loreconvo`
 
 ## Why LoreConvo?
-
-### Your memory stays on your machine
-
-Unlike cloud-based memory tools, LoreConvo stores everything in a SQLite database on your
-own machine. No data leaves your computer. No subscription to a memory cloud. No vendor with
-access to your session history.
-
-Your sessions live in `~/.loreconvo/sessions.db` -- a file you own, can back up, and can
-delete any time.
 
 ### Works wherever you work
 
@@ -27,16 +18,40 @@ Most tools wall off memory by machine or workspace. LoreConvo stores everything
 locally in a SQLite database you own, and surfaces it wherever you are. You decide
 what gets saved; nothing is written without your action.
 
+### You control what gets saved
+
+Competing tools auto-write to memory without asking. LoreConvo puts you in control: you decide what's worth keeping, and you can delete any memory at any time.
+
+Every memory shows you exactly where it came from — which surface captured it, when, what project context it belongs to, and which skill generated it. No mystery. Full provenance.
+
+### Your memory stays on your machine
+
+LoreConvo stores everything in a SQLite database on your own machine. No data leaves your computer. No cloud accounts. No vendor with access to your session history.
+
+Your sessions live in `~/.loreconvo/sessions.db` -- a file you own, can back up, and can delete whenever you want.
+
 ### Structured memory, not raw transcripts
 
 LoreConvo captures two types of memory for each session:
 
 - **Episodic memory:** what happened -- summaries, artifacts created, open questions left behind
-- **Semantic memory:** what was decided -- stable conclusions about the project that persist
-  across sessions
+- **Semantic memory:** what was decided -- stable conclusions about the project that persist across sessions
 
-Together these give Claude a structured, searchable record of your project's history,
-not just a pile of chat transcripts.
+Together these give Claude a structured, searchable record of your project's history, not just a pile of chat transcripts.
+
+## Recall Benchmark
+
+LoreConvo's FTS5 search is benchmarked against a 60-session synthetic corpus (6 topic areas, 36 labeled queries).
+
+| Variant | Recall@5 | MRR |
+|---------|----------|-----|
+| FTS5 + compound token expansion (default) | **88.9%** | **0.875** |
+| FTS5 baseline (no expansion) | 72.2% | 0.708 |
+
+Compound token expansion (camelCase / snake_case query preprocessing) lifts Recall@5 by **+35.7 pp** on queries using technical identifiers like `autoSave`, `pipeline_tracker`, and `get_context_for`.
+
+[Full benchmark report](docs/agent-reports/benchmarks/loreconvo_recall_benchmark_20260522.md) |
+[Reproduce](scripts/run_loreconvo_recall_benchmark.py)
 
 ## Quick Start
 
@@ -68,7 +83,7 @@ Replace `/path/to/loreconvo` with wherever you saved the source folder.
 
 After making code changes, use `/reload-plugins` to refresh without restarting.
 
-Once loaded, Claude has access to all 17 LoreConvo MCP tools automatically. Ask Claude to "save this session" or "recall what we discussed about X" and it will use the tools on its own.
+Once loaded, Claude has access to all 32 LoreConvo MCP tools automatically. Ask Claude to "save this session" or "recall what we discussed about X" and it will use the tools on its own.
 
 ### Cowork (Desktop App)
 
@@ -106,12 +121,14 @@ bash export-to-chat.sh "tax prep"
 The core value of LoreConvo is that context persists across Claude surfaces automatically. Here is the full chain:
 
 ```
-Claude Code (terminal)
+Claude Code  (~/.claude/settings.json via `claude mcp add`)
   |-- SessionEnd hook --> auto_save.py --> ~/.loreconvo/sessions.db
-  |-- SessionStart hook <-- auto_load.py <-- ~/.loreconvo/sessions.db
-                                               ^
-Cowork (desktop app) <--MCP tools-------------|
-  save_session / get_recent_sessions / search_sessions
+  |-- SessionStart hook <-- auto_load.py <-+
+                                           |
+Cursor       (.cursor/mcp.json) <--MCP-----+
+Codex        (~/.codex/config.toml) <--MCP-+
+Hermes Agent (~/.hermes/config.yaml) <-MCP-+
+  All surfaces: save_session / get_recent_sessions / search_sessions
 
 Claude Chat (web)
   |-- export-to-chat.sh --> clipboard --> paste into Chat
@@ -122,7 +139,11 @@ Claude Chat (web)
 - When a session ends, `auto_save.py` captures the conversation and saves a structured summary (decisions, artifacts, open questions, tags) to the local SQLite database.
 - When a new session starts, `auto_load.py` queries the database, scores recent sessions by signal quality, and injects the most relevant context into the session as system context. Sessions with open questions and decisions score highest; low-signal sessions are filtered out. It also indexes any MEMORY.md found in the project directory (see [MEMORY.md Auto-Indexing](#memorymd-auto-indexing) below).
 
-**Cowork** (this desktop app) does not run hooks, but has full access to the same database via the 17 MCP tools. You can call `get_recent_sessions`, `search_sessions`, or `get_context_for` directly from a Cowork conversation to pull in context from any prior Code session.
+**Cursor** connects via `.cursor/mcp.json` in the project root -- the same MCP protocol as Claude Code. See INSTALL.md for setup details.
+
+**OpenAI Codex** connects via `~/.codex/config.toml` using a `[mcp_servers.<name>]` section. See INSTALL.md for setup details.
+
+**Hermes Agent** connects via `~/.hermes/config.yaml` under the `mcp_servers:` key. See INSTALL.md for setup details.
 
 **Claude Chat** (web) does not support plugins. The `export-to-chat.sh` script bridges the gap: it exports your most recent session to your clipboard so you can paste it directly into Chat. This gives Chat the same context that Code would have loaded automatically.
 
@@ -141,12 +162,21 @@ from your work on a project is searchable from any Claude surface.
 # Create a project workspace
 create_project("my-api", "REST API project", expected_skills=["openapi", "python"])
 
+# Add persistent project instructions (optional)
+create_project(
+    "my-api",
+    description="REST API project",
+    instructions="Python 3.10+, SQLite only. No cloud dependencies. Deploy via Docker."
+)
+
 # See recent sessions, skill usage, and open questions for the project
 get_project("my-api")
 
 # Search scoped to the project
 search_sessions("auth design", project="my-api")
 ```
+
+**Project Instructions** (optional): When you create a project, you can store persistent instructions or constraints that Claude will see at session start. This is useful for enforcing project-wide standards without repeating them in every CLAUDE.md file. Instructions are displayed in the auto-load context before recent session summaries.
 
 Used with [LoreDocs](https://github.com/labyrinth-analytics/loredocs), LoreConvo forms a
 portable project workspace for all of Claude -- session memory AND structured knowledge,
@@ -214,52 +244,53 @@ At session end:
 
 **For Cowork users:** Cowork does not run hooks automatically. Add instructions to call `get_recent_sessions` at session start and `save_session` at session end in your project CLAUDE.md. See [COWORK_RESTORE.md](COWORK_RESTORE.md) for details.
 
+## Plans: Free vs Pro
+
+LoreConvo is local-first and free to use. Pro ($8/mo) removes the session limit and
+unlocks LLM-quality summaries, hybrid retrieval search, and cross-product linking.
+Everything runs on your machine on either plan -- Pro adds no cloud component.
+
+Free tier search: keyword (FTS5) + recency ordering.
+Pro tier search: hybrid retrieval -- vector (BGE-small-en-v1.5), BM25 full-text, and
+recency reranking combined via RRF fusion. Finds sessions by meaning, not just keywords.
+
+| | Free | Pro ($8/mo) |
+|---|---|---|
+| Saved sessions | 50 | Unlimited |
+| Full-text search (FTS5) | Yes | Yes |
+| MEMORY.md auto-indexing | Yes | Yes |
+| Project tagging, session linking, skill history | Yes | Yes |
+| Auto-load / auto-save hooks | Yes | Yes |
+| Local-first, no cloud, zero API costs | Yes | Yes |
+| Related-session discovery | Keyword co-occurrence | Embedding-based (BGE-small-en-v1.5) |
+| LLM async session summarization | -- | Yes (Claude Haiku, opt-in) |
+| Hybrid retrieval: vector + BM25 + recency reranking (`rebuild_index`) | -- | Yes (Pro) |
+| Cross-product document linking (`get_docs_for_session`, `session_link_doc`) | -- | Yes (also requires LoreDocs Pro) |
+| Team memory -- export/merge sessions across machines | -- | Yes |
+| Anthropic managed-agent export (`export_for_anthropic`) | -- | Yes |
+
+Check your current tier and usage with `get_tier`. Activate a Pro license with
+`vault_set_tier`.
+
 ## Features
 
+- **Automatic session capture**: Sessions save at session end and load at session start via Claude Code hooks -- no manual `save_session` call required
 - **Cross-client memory**: Your context follows you across Claude Code, Cursor, Codex, and Hermes -- not locked to one IDE or machine
-- **Structured sessions**: Captures decisions, artifacts, open questions -- not just raw text
+- **Structured sessions**: Captures decisions, artifacts, open questions -- not just raw text; optional reasoning_notes field stores agent reasoning chains
 - **Project organization**: Group sessions by project with expected skill sets
 - **Skill tracking**: Record which skills were used for smart filtering
 - **Persona tagging**: Hierarchical personas for agent-specific memory (e.g., `ron-bot:sql`)
 - **Full-text search**: SQLite FTS5 for fast keyword search across all sessions
 - **MEMORY.md auto-indexing**: Your project MEMORY.md is automatically indexed at session start and is searchable alongside regular sessions via `search_sessions`
-- **Dual interface**: MCP tools (for LLM use) + CLI (for human use)
+- **LLM async session summarization (Pro)**: Auto-saved sessions are upgraded to LLM-quality summaries in the background using Claude Haiku. Opt in by setting `LORECONVO_ANTHROPIC_API_KEY`. A daily cap (`LORECONVO_SUMMARIZER_DAILY_CAP`, default 100) prevents runaway API spend. Pro tier only.
+- **Embedding-based related session discovery (Pro)**: `get_related_sessions` automatically discovers sessions with similar content using BGE-small-en-v1.5 embeddings (cosine >= 0.75). Up to 10 bidirectional auto-links per save, same-project scoped. Free tier gets keyword co-occurrence links. Set `LORECONVO_EMBEDDING_LINKS=0` to disable embedding links.
+- **Cross-product document linking (Pro)**: Automatically discovers and links the LoreDocs documents most relevant to any session, and vice versa. Uses two new tools: `get_docs_for_session` and `session_link_doc`. Requires both LoreConvo Pro and LoreDocs Pro.
 - **Local-first**: SQLite database, no cloud dependency, zero API costs
-
-## CLI Reference
-
-```bash
-# Vault a session
-.venv/bin/python3 src/cli.py save -t "Tax pipeline debugging" -s code -m "Fixed the K-1 parser..."
-
-# List recent sessions
-.venv/bin/python3 src/cli.py list --days 7
-
-# Search the vault
-.venv/bin/python3 src/cli.py search "rental insurance split"
-
-# Export for Chat paste (most recent session, markdown format)
-.venv/bin/python3 src/cli.py export --last --format markdown
-
-# Export a specific session by ID
-.venv/bin/python3 src/cli.py export <session-id>
-
-# Export as JSON
-.venv/bin/python3 src/cli.py export --last --format json
-
-# Skill history
-.venv/bin/python3 src/cli.py skill-history rental-property-accounting
-
-# List all skills by usage count
-.venv/bin/python3 src/cli.py skills list
-
-# Stats
-.venv/bin/python3 src/cli.py stats
-```
 
 ## MCP Tools
 
-LoreConvo provides 17 MCP tools that Claude calls automatically during sessions:
+LoreConvo provides 32 MCP tools that Claude calls automatically during sessions.
+The table below shows the most commonly used ones -- see [MCP Tool Catalog](docs/mcp_tool_catalog.md) for the complete reference.
 
 | Tool | What it does |
 |------|-------------|
@@ -270,15 +301,31 @@ LoreConvo provides 17 MCP tools that Claude calls automatically during sessions:
 | `get_context_for` | Pull relevant context for a topic (best for "recall" use) |
 | `tag_session` | Add a persona tag to a session |
 | `link_sessions` | Connect related sessions with a relationship type |
+| `get_related_sessions` | Find sessions related to a given session |
 | `create_project` | Create a named project with expected skills |
 | `get_project` | Get project details and associated sessions |
 | `list_projects` | List all projects |
 | `get_skill_history` | See which sessions used a specific skill |
 | `vault_suggest` | Proactive suggestions for relevant context to load |
 | `get_tier` | Check current tier and license key status |
-| `vault_set_tier` | Set the active tier (free, pro, team) |
+| `vault_set_tier` | Set the active tier (free or pro) |
 | `export_sessions` | Export sessions to a portable JSON format |
 | `import_sessions` | Import sessions from a previously exported JSON file |
+| `consolidate_memories` | Merge related sessions into persistent memory entries (Recall) |
+| `get_memory_digest` | Inject a condensed memory digest into the current session (Recall) |
+| `set_session_expiry` | Mark a session to expire and be pruned after a given date |
+| `get_stats` | Show usage statistics (session count, surface breakdown) |
+| `inspect_sessions` | Inspect session internals for debugging |
+| `export_for_anthropic` | Export sessions in Anthropic managed-agent format (Pro) |
+| `rebuild_index` | Rebuild the LanceDB semantic search index (Pro) |
+| `loreconvo_onboard` | First-time setup wizard |
+| `get_dream_log` | View the consolidation activity log |
+| `get_docs_for_session` | Retrieve LoreDocs documents linked to a specific session (Pro -- requires LoreDocs Pro) |
+| `session_link_doc` | Manually create a link between a session and a LoreDocs document (Pro -- requires LoreDocs Pro) |
+| `pin_session` | Pin or unpin a session to exclude it from automated cleanup |
+| `get_anti_patterns` | List sessions tagged as anti-patterns (approaches to avoid) |
+| `tag_as_anti_pattern` | Tag a session as an anti-pattern so future recalls flag it |
+| `untag_anti_pattern` | Remove an anti-pattern tag from a session |
 
 ## Requirements
 
@@ -332,6 +379,26 @@ python scripts/save_to_loreconvo.py --search "tax pipeline"
 ```
 
 The script auto-discovers the database at `~/.loreconvo/sessions.db` (or pass `--db-path` explicitly). It generates proper UUIDs and writes the same schema as the MCP `save_session` tool.
+
+## What's New
+
+<!-- WHATS_NEW:START -->
+
+## v0.8.6 (2026-07-24)
+
+### Docs: accurate MCP tool listing
+
+The documentation now lists the correct number of MCP tools LoreConvo provides
+(32, previously shown as 28) and includes four tools that were already available
+but missing from the reference: pinning a session, and the anti-pattern tools
+for tagging, untagging, and listing sessions to avoid. A reference to a tool
+under an old name (`rebuild_semantic_index`) was corrected to its current name
+(`rebuild_index`). This release only updates documentation; nothing changes in
+how LoreConvo runs.
+
+<!-- WHATS_NEW:END -->
+
+See the full [changelog](docs/CHANGELOG.md) for the complete release history.
 
 ## License
 
