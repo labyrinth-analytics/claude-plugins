@@ -1,7 +1,7 @@
 {
   "name": "loreconvo",
   "displayName": "LoreConvo",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Vault your Claude conversations. Captures session decisions, artifacts, and context across Code, Cowork, and Chat. Organizes memory by project, skill, and persona. Never re-explain yourself again.",
   "main": "src/server.py",
   "icon": "assets/icon.svg",
@@ -25,26 +25,38 @@
   "hooks": {
     "SessionStart": [
       {
-        "type": "command",
-        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/setup.sh\""
-      },
-      {
-        "type": "command",
-        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_session_start.sh\""
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/setup.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_session_start.sh\""
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "type": "command",
-        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_stop.sh\"",
-        "timeout": 5
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_stop.sh\"",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "SessionEnd": [
       {
-        "type": "command",
-        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_session_end.sh\"",
-        "timeout": 5
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/on_session_end.sh\"",
+            "timeout": 5
+          }
+        ]
       }
     ]
   }
