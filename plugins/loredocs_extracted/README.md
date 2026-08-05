@@ -1,4 +1,4 @@
-# LoreDocs v0.1.18
+# LoreDocs v0.1.19
 
 Your AI project's knowledge base. Organized, searchable, version-tracked.
 
@@ -35,7 +35,7 @@ Or inside an existing session:
 /plugin add /path/to/loredocs
 ```
 
-Once loaded, Claude has access to all 46 LoreDocs MCP tools automatically. Ask Claude to "create a vault for this project" or "find the architecture doc" and it uses the tools on its own.
+Once loaded, Claude has access to all 48 LoreDocs MCP tools automatically. Ask Claude to "create a vault for this project" or "find the architecture doc" and it uses the tools on its own.
 
 ### Cowork (Desktop App)
 
@@ -200,7 +200,7 @@ and usage anytime with `vault_tier_status`. Activate a Pro license with `vault_s
 
 ## MCP Tools
 
-LoreDocs provides 46 MCP tools by default (47 with LOREDOCS_ENABLE_CAP_TOOLS=1) organized by function:
+LoreDocs provides 48 MCP tools by default (49 with LOREDOCS_ENABLE_CAP_TOOLS=1) organized by function:
 
 ### Vault Management (8 tools)
 | Tool | What it does |
@@ -258,10 +258,12 @@ LoreDocs provides 46 MCP tools by default (47 with LOREDOCS_ENABLE_CAP_TOOLS=1) 
 | `vault_estimate_tokens` | Estimate the token count an injection call would use before running it |
 | `vault_get_server_capabilities` | Report which injection/token-budget features this server build supports |
 
-### Import/Export (3 tools)
+### Import/Export (5 tools)
 | Tool | What it does |
 |------|-------------|
 | `vault_import_dir` | Import a directory of files into a vault |
+| `vault_import_notion` | Import Notion pages and databases into a vault (one-time, no live sync) |
+| `vault_import_notion_setup` | Report Notion import readiness and how to enable it (read-only) |
 | `vault_export` | Export a document to a file on disk |
 | `vault_export_manifest` | Export vault metadata as a JSON manifest |
 
@@ -362,20 +364,39 @@ The script auto-discovers the database at `~/.loredocs/loredocs.db` (or pass `--
 
 <!-- WHATS_NEW:START -->
 
-## v0.1.18 (2026-07-31)
+## v0.1.19 (2026-08-04)
 
-### Changed: Tool output format change -- recalled-content trust boundary
+### Added: Import from Notion
 
-`vault_inject`, `vault_prime`, and `vault_inject_by_tag` now wrap the
-returned document text in an explicit untrusted-data delimiter (HTML
-comment, with a per-call nonce) before returning it, with a provenance
-line per document ("vault doc -- unverified authorship", identical
-regardless of the document's `priority`).
+A new `vault_import_notion` MCP tool (and matching `loredocs import notion` CLI
+command) imports Notion pages and databases into a vault. This is an
+import-once-and-own model: pages are fetched and stored as LoreDocs documents
+at import time, and there is no live sync -- changes made in Notion afterward
+do not propagate automatically. Large imports are resumable from a checkpoint
+file if interrupted partway through. Requires a Notion integration token,
+which can be stored securely in your OS keychain with `loredocs
+set-notion-token` (and removed with `clear-notion-token`); `loredocs
+check-notion` reports whether your setup is ready to import.
 
-This is a framing/boundary-integrity fix (SH-13436), not a claim to solve
-prompt injection. The injected text format has never been a documented,
-stable contract for these tools; any external tooling parsing it
-structurally should expect this and future format changes.
+### Changed: Safer startup and logging for the optional admin cap tools
+
+If you run LoreDocs with `LOREDOCS_ENABLE_CAP_TOOLS=1` (the optional admin
+tooling, off by default), the server now refuses to start if the required
+admin token is missing or weak, instead of running with that protection
+silently absent. The admin token is also now redacted from any logging path.
+Separately, the schema migration that added per-vault injection caps is more
+defensive: it detects and hard-fails on a half-migrated database (documented
+in the new `TROUBLESHOOTING.md`) rather than risking silent data corruption.
+None of this changes default `vault_inject`/`vault_prime`/`vault_inject_by_tag`
+behavior for the normal (non-admin-tooling) usage path.
+
+### Fixed: Free-tier upgrade messages now link to a working checkout page
+
+Hitting a Free-tier limit, or calling `get_tier`/`get_license_tier`, used to
+point you at a bare domain or an email address instead of a working upgrade
+link. Both now link directly to the Stripe checkout page, and a bug that
+silently dropped the upgrade link from three tier-limit error messages is
+fixed.
 
 <!-- WHATS_NEW:END -->
 
