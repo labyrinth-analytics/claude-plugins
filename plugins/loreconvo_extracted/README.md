@@ -1,4 +1,4 @@
-# LoreConvo v0.9.0
+# LoreConvo v0.10.0
 
 Your memory follows your identity, not your tool — with your consent.
 
@@ -85,7 +85,7 @@ Replace `/path/to/loreconvo` with wherever you saved the source folder.
 
 After making code changes, use `/reload-plugins` to refresh without restarting.
 
-Once loaded, Claude has access to all 38 LoreConvo MCP tools automatically. Ask Claude to "save this session" or "recall what we discussed about X" and it will use the tools on its own.
+Once loaded, Claude has access to all 39 LoreConvo MCP tools automatically. Ask Claude to "save this session" or "recall what we discussed about X" and it will use the tools on its own.
 
 ### Cowork (Desktop App)
 
@@ -307,7 +307,7 @@ Check your current tier and usage with `get_tier`. Activate a Pro license with
 
 ## MCP Tools
 
-LoreConvo provides 38 MCP tools that Claude calls automatically during sessions.
+LoreConvo provides 39 MCP tools that Claude calls automatically during sessions.
 The table below shows the most commonly used ones -- see [MCP Tool Catalog](docs/mcp_tool_catalog.md) for the complete reference.
 
 | Tool | What it does |
@@ -350,6 +350,7 @@ The table below shows the most commonly used ones -- see [MCP Tool Catalog](docs
 | `update_memory_item` | Correct a memory item's title, body, tags, or metadata, or move it between projects |
 | `configure_agent_context` | Store or update a named topic config so an agent auto-loads targeted context at session start |
 | `inject_agent_context` | Return targeted session context for an agent, using stored or call-time topics |
+| `graph_session_map` | Export a Mermaid knowledge graph of sessions and their links |
 
 ## Requirements
 
@@ -408,42 +409,62 @@ The script auto-discovers the database at `~/.loreconvo/sessions.db` (or pass `-
 
 <!-- WHATS_NEW:START -->
 
-## v0.9.0 (2026-08-04)
+## v0.10.0 (2026-08-09)
 
-### New: Structured memory items -- decisions, open questions, and artifacts
+### New: See your session history as a diagram
 
-LoreConvo now tracks structured memory items alongside sessions. A memory item
-is a single named thing you want to carry forward: a decision you made, a
-question still open, or an artifact you produced. Four new tools cover the
-full lifecycle:
+The new **`graph_session_map`** tool draws a picture of how your sessions
+connect. If you have been linking sessions together (with `link_sessions`),
+this renders the whole web as a Mermaid diagram you can paste into any
+Markdown editor, wiki, or docs site that supports Mermaid.
 
-- **`save_memory_item`** -- Save an item with a type (`decision`, `question`,
-  or `artifact`), a body, optional tags, and an optional project name.
-- **`query_memory_items`** -- Retrieve items by type, project, status (`active`,
-  `retired`, `answered`, `wont_answer`), or recency.
-- **`transition_memory_item`** -- Move an item to a terminal status: retire a
-  decision that no longer applies, mark a question as answered, or record that
-  a question will not be answered.
-- **`update_memory_item`** -- Correct a title, body, or tag set on any item,
-  or move it to a different project without losing its history.
+You can scope the diagram to a single project, start it from one session and
+walk outward a set number of hops, or export everything. Useful when you want
+to see the shape of a long-running project rather than read through it session
+by session.
 
-Structured items appear in `get_memory_digest` output and survive session
-consolidation. They have an explicit `status` field, so you can always tell
-which questions are still open and which decisions are still in force.
+### New: Capture context as you work, not just at the end
 
-### New: Agent context injection
+LoreConvo can now take snapshots partway through a session instead of waiting
+for the session to end. It queues a snapshot every 10 tool calls and processes
+it in the background, so it does not slow down what you are doing. If a session
+ends unexpectedly, the work up to the last snapshot is still saved.
 
-Two new tools let agents configure and auto-load targeted topic context at
-session start without scanning all recent sessions:
+This is **off by default**. To turn it on, set `LORECONVO_POST_TURN_CAPTURE=1`.
+You can change how often it snapshots with `LORECONVO_TURN_CAPTURE_INTERVAL`
+and put a ceiling on daily processing with
+`LORECONVO_TURN_CAPTURE_MAX_CALLS_PER_DAY`.
 
-- **`configure_agent_context`** -- Store a named topic config for an agent
-  (a set of search topics and context depth). The config persists across
-  sessions so the agent does not need to pass topics on every call.
-- **`inject_agent_context`** -- Return targeted session context for a named
-  agent, using its stored config or call-time topic overrides.
+### New: Clear your Pro license from the command line
 
-This is intended for automated agent workflows where the same agent starts
-many sessions and always needs context on the same topics.
+```
+loreconvo license clear
+```
+
+Removes the stored Pro license key from this machine. If you have suite-wide
+Pro shared with LoreDocs, add `--suite` to clear it from both. The command now
+tells you when something could not be cleared rather than failing quietly.
+
+### Improved: Faster server startup
+
+LoreConvo no longer opens the database when the server starts -- it waits until
+the first tool call that actually needs it. Sessions that load the plugin but
+never touch memory no longer pay for database setup.
+
+### Fixed: False "your install is degraded" warning
+
+If you installed LoreConvo from source with `install.sh` rather than
+`pip install loreconvo`, every session hook printed a warning saying your
+package was installed but broken, and told you to reinstall. Nothing was
+actually wrong -- your sessions were being saved correctly the whole time, and
+no reinstall was needed. LoreConvo now recognizes a source install as a normal
+setup and stays quiet. The warning still appears when an installed package is
+genuinely broken, which is what it was meant for.
+
+### Fixed: Security update
+
+Updated the `cryptography` dependency from 49.0.0 to 50.0.0 to pick up a fix
+for CVE-2026-69247.
 
 <!-- WHATS_NEW:END -->
 
